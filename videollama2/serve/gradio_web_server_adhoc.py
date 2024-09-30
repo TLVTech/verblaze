@@ -315,4 +315,4 @@ with gr.Blocks(title='VideoLLaMA 2 🔥🚀🔥', theme=theme, css=block_css) as
         [message, chatbot],
         [image, video, message, chatbot, textbox])
 
-demo.launch()
+demo.launch(share = True)
