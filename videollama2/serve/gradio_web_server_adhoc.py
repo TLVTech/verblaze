@@ -286,8 +286,8 @@ with gr.Blocks(title='VERBLAZE 🔥🚀🔥', theme=theme, css=block_css) as dem
                 inputs=[video, textbox],
             )
 
-    gr.Markdown(tos_markdown)
-    gr.Markdown(learn_more_markdown)
+    # gr.Markdown(tos_markdown)
+    # gr.Markdown(learn_more_markdown)
 
     submit_btn.click(
         generate, 
