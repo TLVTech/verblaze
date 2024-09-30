@@ -18,8 +18,7 @@ title_markdown = ("""
     <img src="https://s2.loli.net/2024/06/03/D3NeXHWy5az9tmT.png" alt="VERBLAZE 🔥🚀🔥" style="max-width: 120px; height: auto;">
   </a>
   <div>
-    <h1 >Verblaze</h1>
-    # <h5 style="margin: 0;">If this demo please you, please give us a star ⭐ on Github or 💖 on this space.</h5>
+    <h1 >Verblaze - Demo</h1>
   </div>
 </div>
 
