@@ -26,8 +26,8 @@ from transformers import TextIteratorStreamer
 
 from videollama2.constants import WORKER_HEART_BEAT_INTERVAL
 from videollama2.utils import (build_logger, server_error_msg, pretty_print_semaphore)
-from videollama2.model.builder import load_pretrained_model
-from videollama2.mm_utils import process_images, process_videos, load_image_from_base64, tokenizer_image_token, KeywordsStoppingCriteria, tokenizer_MMODAL_token
+from videollama2.model import load_pretrained_model
+from videollama2.mm_utils import process_image, process_video, load_image_from_base64, KeywordsStoppingCriteria, tokenizer_MMODAL_token
 from videollama2.mm_utils import chunk_list, frame_expansion
 from videollama2.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, DEFAULT_VIDEO_TOKEN, NUM_FRAMES, MMODAL_TOKEN_INDEX
 
@@ -180,7 +180,7 @@ class ModelWorker:
                 try:
                     print("Load image...")
                     images_or_videos = [load_image_from_base64(image) for image in images_or_videos]
-                    images_or_videos = process_images(images_or_videos, image_processor, model.config)
+                    images_or_videos = process_image(images_or_videos, image_processor, model.config)
                     
                     modal_list = ["image"]
                     replace_token = DEFAULT_IMAGE_TOKEN
@@ -192,7 +192,7 @@ class ModelWorker:
                     if not "use_taug" in self.model_path:
                         frame_id_list = np.linspace(0, duration-1, 8, dtype=int)
                         video_frames = decord_vr.get_batch(frame_id_list).asnumpy()
-                        images_or_videos = process_videos(video_frames, image_processor, model.config)
+                        images_or_videos = process_video(video_frames, image_processor, model.config)
                     else:
                         print("Temporal augmentation activated!!!")
                         frame_id_list = np.linspace(0, duration-1, 8 * 2 * 2, dtype=int)
@@ -200,11 +200,11 @@ class ModelWorker:
                         video_frames = [Image.fromarray(f) for f in video_data.asnumpy()]
                         chunked_video_frames = chunk_list(video_frames, 2*2)
                         expanded_video_frames = [frame_expansion(frame_list, 2) for frame_list in chunked_video_frames]
-                        images_or_videos = process_videos(expanded_video_frames, image_processor, model.config)
+                        images_or_videos = process_video(expanded_video_frames, image_processor, model.config)
 
                     # frame_id_list = np.linspace(0, duration-1, NUM_FRAMES, dtype=int)
                     # images_or_videos = decord_vr.get_batch(frame_id_list).asnumpy()
-                    # images_or_videos = process_videos(images_or_videos, image_processor, model.config)
+                    # images_or_videos = process_video(images_or_videos, image_processor, model.config)
                     #print("images_or_videos.shape:", images_or_videos.shape)
                     modal_list = ["video"]
                     replace_token = DEFAULT_VIDEO_TOKEN
@@ -225,7 +225,7 @@ class ModelWorker:
                 
 
                 # if len(images_or_videos) % NUM_FRAMES == 0:
-                #     images_or_videos = process_images(images_or_videos, image_processor, model.config)
+                #     images_or_videos = process_image(images_or_videos, image_processor, model.config)
                 #     #images_or_videos = [image.to(self.model.device, dtype=torch.float16) for image in images_or_videos]
                 #     #modal_list = ["image"] * len(images_or_videos)
                 #     images_or_videos = images_or_videos.to(self.model.device, dtype=torch.float16)
