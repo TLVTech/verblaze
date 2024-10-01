@@ -26,7 +26,8 @@ from transformers import TextIteratorStreamer
 
 from videollama2.constants import WORKER_HEART_BEAT_INTERVAL
 from videollama2.utils import (build_logger, server_error_msg, pretty_print_semaphore)
-from videollama2.model.builder import load_pretrained_model
+# from videollama2.model.builder import load_pretrained_model
+from videollama2.model import load_pretrained_model
 from videollama2.mm_utils import process_images, process_videos, load_image_from_base64, tokenizer_image_token, KeywordsStoppingCriteria, tokenizer_MMODAL_token
 from videollama2.mm_utils import chunk_list, frame_expansion
 from videollama2.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, DEFAULT_VIDEO_TOKEN, NUM_FRAMES, MMODAL_TOKEN_INDEX

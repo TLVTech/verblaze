@@ -3,7 +3,8 @@ import torch
 
 from videollama2.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, NUM_FRAMES
 from videollama2.conversation import conv_templates, SeparatorStyle
-from videollama2.model.builder import load_pretrained_model
+# from videollama2.model.builder import load_pretrained_model
+from videollama2.model import load_pretrained_model
 from videollama2.utils import disable_torch_init
 from videollama2.mm_utils import process_images, tokenizer_image_token, get_model_name_from_path, tokenizer_MMODAL_token
 
