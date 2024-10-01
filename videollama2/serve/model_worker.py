@@ -27,7 +27,7 @@ from transformers import TextIteratorStreamer
 from videollama2.constants import WORKER_HEART_BEAT_INTERVAL
 from videollama2.utils import (build_logger, server_error_msg, pretty_print_semaphore)
 from videollama2.model import load_pretrained_model
-from videollama2.mm_utils import process_image, process_video, load_image_from_base64, KeywordsStoppingCriteria, tokenizer_MMODAL_token
+from videollama2.mm_utils import process_image, process_video, load_image_from_base64, KeywordsStoppingCriteria, tokenizer_multimodal_token
 from videollama2.mm_utils import chunk_list, frame_expansion
 from videollama2.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, DEFAULT_VIDEO_TOKEN, NUM_FRAMES, MMODAL_TOKEN_INDEX
 
@@ -255,7 +255,7 @@ class ModelWorker:
 
         #input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).to(self.device)
         # tokenizer for our video-llama beta
-        input_ids = tokenizer_MMODAL_token(prompt, tokenizer, modal_token_index, return_tensors='pt').unsqueeze(0).to(self.device)
+        input_ids = tokenizer_multimodal_token(prompt, tokenizer, modal_token_index, return_tensors='pt').unsqueeze(0).to(self.device)
         #print("Current prompt:", prompt)
         #print("input_ids.shape:", input_ids.shape)
         keywords = [stop_str]
