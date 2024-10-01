@@ -29,7 +29,7 @@ from videollama2.utils import (build_logger, server_error_msg, pretty_print_sema
 from videollama2.model import load_pretrained_model
 from videollama2.mm_utils import process_image, process_video, load_image_from_base64, KeywordsStoppingCriteria, tokenizer_multimodal_token
 from videollama2.mm_utils import chunk_list, frame_sample
-from videollama2.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, DEFAULT_VIDEO_TOKEN, NUM_FRAMES, MMODAL_TOKEN_INDEX
+from videollama2.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, DEFAULT_VIDEO_TOKEN, NUM_FRAMES, MODAL_INDEX_MAP
 
 
 GB = 1 << 30
@@ -184,7 +184,7 @@ class ModelWorker:
                     
                     modal_list = ["image"]
                     replace_token = DEFAULT_IMAGE_TOKEN
-                    modal_token_index = MMODAL_TOKEN_INDEX["IMAGE"]
+                    modal_token_index = MODAL_INDEX_MAP["IMAGE"]
                 except:
                     print("Load video instead...")
                     decord_vr = VideoReader(uri=images_or_videos[0], ctx=cpu(0))
@@ -208,7 +208,7 @@ class ModelWorker:
                     #print("images_or_videos.shape:", images_or_videos.shape)
                     modal_list = ["video"]
                     replace_token = DEFAULT_VIDEO_TOKEN
-                    modal_token_index = MMODAL_TOKEN_INDEX["VIDEO"]
+                    modal_token_index = MODAL_INDEX_MAP["VIDEO"]
                 
                 if type(images_or_videos) is list:
                     images_or_videos = [image.to(self.model.device, dtype=torch.float16) for image in images_or_videos]
