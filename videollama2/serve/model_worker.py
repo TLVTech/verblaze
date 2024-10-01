@@ -28,7 +28,7 @@ from videollama2.constants import WORKER_HEART_BEAT_INTERVAL
 from videollama2.utils import (build_logger, server_error_msg, pretty_print_semaphore)
 from videollama2.model import load_pretrained_model
 from videollama2.mm_utils import process_image, process_video, load_image_from_base64, KeywordsStoppingCriteria, tokenizer_multimodal_token
-from videollama2.mm_utils import chunk_list, frame_expansion
+from videollama2.mm_utils import chunk_list, frame_sample
 from videollama2.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, DEFAULT_VIDEO_TOKEN, NUM_FRAMES, MMODAL_TOKEN_INDEX
 
 
@@ -199,7 +199,7 @@ class ModelWorker:
                         video_data = decord_vr.get_batch(frame_id_list)
                         video_frames = [Image.fromarray(f) for f in video_data.asnumpy()]
                         chunked_video_frames = chunk_list(video_frames, 2*2)
-                        expanded_video_frames = [frame_expansion(frame_list, 2) for frame_list in chunked_video_frames]
+                        expanded_video_frames = [frame_sample(frame_list, 2) for frame_list in chunked_video_frames]
                         images_or_videos = process_video(expanded_video_frames, image_processor, model.config)
 
                     # frame_id_list = np.linspace(0, duration-1, NUM_FRAMES, dtype=int)
