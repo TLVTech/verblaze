@@ -7,7 +7,11 @@ TTL=300                               # Time to live for DNS record
 TYPE="CNAME"                              # Record type (A, CNAME, etc.)
 
 # Command to get the desired output (example: getting your public IP address)
-OUTPUT=$(./run-gradio.sh | grep -Eo 'https?://.*(gradio\.live)')
+./run-gradio.sh
+sleep 10
+OUTPUT=$(cat /tmp/gradio.log | grep -Eo 'https?://.*(gradio\.live)')
+
+echo Deploying $OUTPUT
 
 # Validate the output
 if [[ -z "$OUTPUT" ]]; then
@@ -15,30 +19,8 @@ if [[ -z "$OUTPUT" ]]; then
     exit 1
 fi
 
-# Create JSON payload for updating the DNS record
-cat << EOF > /tmp/route53-record-update.json
-{
-  "Comment": "Auto update DNS record via script",
-  "Changes": [
-    {
-      "Action": "UPSERT",
-      "ResourceRecordSet": {
-        "Name": "$RECORD_NAME",
-        "Type": "$TYPE",
-        "TTL": $TTL,
-        "ResourceRecords": [
-          {
-            "Value": "$OUTPUT"
-          }
-        ]
-      }
-    }
-  ]
-}
-EOF
 
-# Update the Route 53 record
-aws route53 change-resource-record-sets --hosted-zone-id $HOSTED_ZONE_ID --change-batch file:///tmp/route53-record-update.json
+aws s3api put-bucket-website --bucket verblaze.tlvtech.io --website-configuration "{ \"RedirectAllRequestsTo\": { \"HostName\": \"$OUTPUT\", \"Protocol\": \"https\" } }"
 
 # Check if the update was successful
 if [[ $? -eq 0 ]]; then
@@ -47,7 +29,4 @@ else
     echo "Failed to update DNS record"
     exit 1
 fi
-
-# Clean up the temporary file
-rm /tmp/route53-record-update.json
 
