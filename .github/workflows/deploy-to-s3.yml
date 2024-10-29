@@ -27,4 +27,4 @@ jobs:
 
     - name: Upload HTML to S3
       run: |
-        aws s3 cp index.html s3://verblaze.tlvtech.io/index.html --acl public-read
+        aws s3 cp index.html s3://verblaze.tlvtech.io/index.html
