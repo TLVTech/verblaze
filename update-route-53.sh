@@ -1,4 +1,5 @@
 #!/bin/bash
+cd /home/ubuntu/verblaze || { echo "Failed to change directory"; exit 1; }
 
 # Set variables
 BUCKET_NAME="verblaze.tlvtech.io"
