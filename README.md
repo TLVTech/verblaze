@@ -1,3 +1,9 @@
+---
+title: verblaze
+app_file: videollama2/serve/gradio_web_server.py
+sdk: gradio
+sdk_version: 3.50.0
+---
 <p align="center">
     <img src="https://github.com/DAMO-NLP-SG/VideoLLaMA2/blob/e7bc34e0e9a96d77947a75b54399d9f96ccf209d/assets/logo.png" width="150" style="margin-bottom: 0.2;"/>
 <p>
