@@ -1,14 +1,10 @@
 #!/bin/bash
 cd /home/ubuntu/verblaze || { echo "Failed to change directory"; exit 1; }
-
-# Set variables
-BUCKET_NAME="verblaze.tlvtech.io"
-CLOUDFRONT_DISTRIBUTION_ID="E3LNQZFD1JJLAI"
-HTML_FILE="index.html"
+source .env
 
 ./run-gradio.sh
-sleep 10
-OUTPUT=$(cat /tmp/script_output.log | grep -Eo 'https?://.*(gradio\.live)')
+sleep 30
+OUTPUT=$(cat $LOG_FILE | grep -Eo 'https?://.*(gradio\.live)')
 echo Deploying $OUTPUT
 cat <<EOF > $HTML_FILE
 <!DOCTYPE html>
@@ -32,23 +28,7 @@ else
     exit 1
 fi
 
-aws s3 cp "$HTML_FILE" "s3://$BUCKET_NAME/index.html"
-
-# Check if the upload was successful
-if [[ $? -eq 0 ]]; then
-    echo "HTML file uploaded successfully to S3."
-else
-    echo "Failed to upload HTML file to S3."
-    exit 1
-fi
-INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths "/index.html" --query 'Invalidation.Id' --output text)
-if [[ $? -eq 0 ]]; then
-    echo "Cache invalidation initiated successfully. Invalidation ID: $INVALIDATION_ID"
-else
-    echo "Failed to initiate cache invalidation."
-    exit 1
-fi
-
 git add $HTML_FILE
 git commit -m "Update redirect to $OUTPUT"
-git push origin main
+git push https://$GITHUB_TOKEN@github.com/$GITHUB_REPO.git main
+
