@@ -1,0 +1,31 @@
+name: Deploy to S3
+
+on:
+  push:
+    branches:
+      - start-ad-stop-lambda 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging 
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1  # Change to your AWS region
+
+    - name: Upload HTML to S3
+      run: |
+        aws s3 cp index.html s3://verblaze.tlvtech.io/index.html
+        
+    - name: Invalidate CloudFront Cache
+      run: |
+        CLOUDFRONT_DISTRIBUTION_ID=${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths "/index.html" --query 'Invalidation.Id' --output text)
+        echo "Cache invalidation initiated successfully. Invalidation ID: $INVALIDATION_ID"
