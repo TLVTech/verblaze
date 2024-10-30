@@ -1,0 +1,45 @@
+service: ec2-scheduler
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: ${env:REGION} # You can reference environment variables
+  environment:
+    INSTANCE_ID: ${env:INSTANCE_ID}
+
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "logs:*"
+            - "cloudwatch:*"
+          Resource: "*"
+        - Effect: "Allow"
+          Action:
+            - "ec2:StartInstances"
+            - "ec2:StopInstances"
+          Resource:
+            - "arn:aws:ec2:${env:REGION}:${aws:accountId}:instance/${env:INSTANCE_ID}"
+
+functions:
+  startEC2:
+    handler: lambdas/lambda_functions.start_ec2 # Entry point to the start function
+    environment:
+      START_FUNCTION_NAME: ${env:START_FUNCTION_NAME}
+    events:
+      - schedule: cron(0 8 * * ? *) # Runs at 8 AM UTC
+
+  stopEC2:
+    handler: lambdas/lambda_functions.stop_ec2 # Entry point to the stop function
+    environment:
+      STOP_FUNCTION_NAME: ${env:STOP_FUNCTION_NAME}
+    events:
+      - schedule: cron(0 17 * * ? *) # Runs at 5 PM UTC
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true # Packages dependencies in a Docker container to avoid platform mismatches
