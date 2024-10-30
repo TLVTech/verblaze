@@ -24,6 +24,9 @@ jobs:
       run: |
         aws s3 cp index.html s3://verblaze.tlvtech.io/index.html
         
+    - name: Wait before cache invalidation
+      run: sleep 5 
+      
     - name: Invalidate CloudFront Cache
       run: |
         CLOUDFRONT_DISTRIBUTION_ID=${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
