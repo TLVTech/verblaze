@@ -10,6 +10,7 @@ import sys
 sys.path.append('./')
 from videollama2 import model_init, mm_infer
 from videollama2.utils import disable_torch_init
+from google_vertex.vertexApi import process_image_vertex, process_video_vertex
 
 
 title_markdown = ("""
@@ -150,6 +151,70 @@ def generate(image, video, message, chatbot, textbox_in, temperature, top_p, max
 
     return gr.update(value=image, interactive=True), gr.update(value=video, interactive=True), message, chatbot
 
+@spaces.GPU(duration=120)
+def generate_vertexai(image, video, message, chatbot, textbox_in, temperature, top_p, max_output_tokens, dtype=torch.float16):
+    data = []
+
+    processor = handler.processor
+    try:
+        if image is not None:
+            data.append((processor['image'](image).to(handler.model.device, dtype=dtype), '<image>'))
+        elif video is not None:
+            data.append((processor['video'](video).to(handler.model.device, dtype=dtype), '<video>'))
+        elif image is None and video is None:
+            data.append((None, '<text>'))
+        else:
+            raise NotImplementedError("Not support image and video at the same time")
+    except Exception as e:
+        traceback.print_exc()
+        return gr.update(value=None, interactive=True), gr.update(value=None, interactive=True), message, chatbot
+
+    assert len(message) % 2 == 0, "The message should be a pair of user and system message."
+
+    show_images = ""
+    if image is not None:
+        show_images += f'<img src="./file={image}" style="display: inline-block;width: 250px;max-height: 400px;">'
+    if video is not None:
+        show_images += f'<video controls playsinline width="500" style="display: inline-block;"  src="./file={video}"></video>'
+
+    one_turn_chat = [textbox_in, None]
+
+    # 1. first run case
+    if len(chatbot) == 0:
+        one_turn_chat[0] += "\n" + show_images
+    # 2. not first run case
+    else:
+        # scanning the last image or video
+        length = len(chatbot)
+        for i in range(length - 1, -1, -1):
+            previous_image = re.findall(r'<img src="./file=(.+?)"', chatbot[i][0])
+            previous_video = re.findall(r'<video controls playsinline width="500" style="display: inline-block;"  src="./file=(.+?)"', chatbot[i][0])
+
+            if len(previous_image) > 0:
+                previous_image = previous_image[-1]
+                # 2.1 new image append or pure text input will start a new conversation
+                if (video is not None) or (image is not None and os.path.basename(previous_image) != os.path.basename(image)):
+                    message.clear()
+                    one_turn_chat[0] += "\n" + show_images
+                break
+            elif len(previous_video) > 0:
+                previous_video = previous_video[-1]
+                # 2.2 new video append or pure text input will start a new conversation
+                if image is not None or (video is not None and os.path.basename(previous_video) != os.path.basename(video)):
+                    message.clear()
+                    one_turn_chat[0] += "\n" + show_images
+                break
+
+    message.append({'role': 'user', 'content': textbox_in})
+    #text_en_out = handler.generate(data, message, temperature=temperature, top_p=top_p, max_output_tokens=max_output_tokens)
+    text_en_out = process_image_vertex(image, textbox_in)
+    message.append({'role': 'assistant', 'content': text_en_out})
+
+    one_turn_chat[1] = text_en_out
+    chatbot.append(one_turn_chat)
+
+    return gr.update(value=image, interactive=True), gr.update(value=video, interactive=True), message, chatbot
+
 
 def regenerate(message, chatbot):
     message.pop(-1), message.pop(-1)
@@ -245,6 +310,7 @@ with gr.Blocks(title='VERBLAZE 🔥🚀🔥', theme=theme, css=block_css) as dem
                 # stop_btn     = gr.Button(value="⏹️  Stop Generation", interactive=False)
                 regenerate_btn = gr.Button(value="🔄  Regenerate", interactive=True)
                 clear_btn      = gr.Button(value="🗑️  Clear history", interactive=True)
+                generate_vertexai_btn = gr.Button(value="Generate with Vertex AI", interactive=True)
 
     with gr.Row():
         with gr.Column():
@@ -293,6 +359,11 @@ with gr.Blocks(title='VERBLAZE 🔥🚀🔥', theme=theme, css=block_css) as dem
         [image, video, message, chatbot, textbox, temperature, top_p, max_output_tokens],
         [image, video, message, chatbot])
 
+    generate_vertexai_btn.click(
+        generate_vertexai, 
+        [image, video, message, chatbot, textbox, temperature, top_p, max_output_tokens],
+        [image, video, message, chatbot])
+    
     regenerate_btn.click(
         regenerate, 
         [message, chatbot], 

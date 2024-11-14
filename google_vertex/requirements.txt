@@ -1,0 +1,8 @@
+google-cloud-aiplatform
+sentencepiece
+google-auth
+anthropic
+langchain-google-vertexai
+numpy<2
+openai
+immutabledict
