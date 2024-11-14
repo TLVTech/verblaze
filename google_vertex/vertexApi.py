@@ -8,8 +8,7 @@ from vertexai.generative_models import GenerativeModel, Part
 
 # TODO(developer): Update and un-comment below line
 # PROJECT_ID = "your-project-id"
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = 'aerobic-goal-441610-j0-a493a4e132de.json'
-vertexai.init(project="aerobic-goal-441610-j0", location="us-central1")
+
 
 
 vision_model = GenerativeModel("gemini-1.5-flash-002")
